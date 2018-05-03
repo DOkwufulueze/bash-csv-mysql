@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# Bash Utility to watch any directory for changes and runs a supplied custom command on the event
+
+
+scriptAbsolutePath=;
+helpText=;
+directory=;
+commandEntry=;
+
+function displayHowToUse() {
+  helpText=$(cat << EOF
+
+
+
+            watch-directory
+            Version: 1.0.0
+            Usage:
+              watch-directory [OPTIONS]
+
+            Options:
+              <-d | --directory directoryName>
+              <-c | --command commandEntry>
+              <-h | --help>
+
+            Synopsis:
+              Purpose: To watch a directory for changes and also runs a command whenever a change is observed
+
+              Options:
+                -d | --directory: This option receives the name of the directory to watch.
+
+                -c | --command: This option receives the name of the command to run whenever a change happens in the directory.
+
+                -h | --help: This option displays this help page.
+
+
+
+
+            Author: Daniel Okwufulueze [https://github.com/DOkwufulueze]
+            Date: 02/05/2018
+
+EOF
+);
+}
+
+function getAbsolutePathOfSelf() {
+  pushd $(dirname "$0") > /dev/null;
+  scriptAbsolutePath="$(pwd -P)";
+  popd > /dev/null;
+}
+
+function beginWatch() {
+  fswatch -0 "${directory}" | while read -d "" event
+    do
+      [[ -f "${event}" ]] && $(${commandEntry} -f ${event});
+      # [[ -f "${event}" ]] && echo "${commandEntry} -f ${event}";
+    done
+}
+
+if [[ $# -gt 0 ]]; then
+  while [[ "$1" != "" ]]; do
+    case "$1" in
+      -d | --directory )
+        shift;
+        directory="$1";
+      ;;
+
+      -c | --command )
+        shift;
+        commandEntry="$*";
+      ;;
+
+      -h | --help )
+        displayHowToUse;
+        echo "${helpText}" | less;
+        exit;
+      ;;
+
+      * )
+        echo "Invalid entry in watch-directory invocation.";
+        exit;
+      ;;
+    esac
+
+    [[ -n "${commandEntry}" && -n "${directory}" ]] && break;
+    shift;
+  done
+fi
+
+
+getAbsolutePathOfSelf;
+
+directory="${scriptAbsolutePath}/${directory}"
+
+beginWatch;

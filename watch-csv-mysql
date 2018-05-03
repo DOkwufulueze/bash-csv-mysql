@@ -1,0 +1,149 @@
+#!/bin/bash
+
+# Bash utility that calls a directory-watching Bash utility with a custom shell script
+#
+# Example:
+#  ./watch-csv-mysql -d sandbox/test -c csv-mysql -h localhost -u root -p password -D DOkwufulueze -t profile
+
+helpText=;
+directory=;
+commandName=;
+
+commandEntry=;
+
+userNameComposition=;
+passwordComposition=;
+hostComposition=;
+portComposition=;
+databaseComposition=;
+tableComposition=;
+fileNameComposition=;
+
+function displayHowToUse() {
+  helpText=$(cat << EOF
+
+
+
+            watch-csv-mysql
+            Version: 1.0.0
+            Usage:
+              watch-csv-mysql [OPTIONS]
+
+            Options:
+              <-d | --directory directoryName>
+              <-c | --command commandName>
+              <-f | --filename filename>
+              <-h | --host host>
+              <-P | --port port>
+              <-u | --username username>
+              <-p | --password password>
+              <-D | --database database>
+              <-t | --table table>
+              </? | --help>
+
+            Synopsis:
+              Purpose: This script watches any directory for changes
+              such as an addition of a CSV file and calls the watch-directory
+              script with a command to transfer the contents of the CSV file
+              to a chosen MySQL database.
+
+              Options:
+                -d | --directory: This option receives the name of the directory to watch.
+                -c | --command: This option receives the name of the command to run wheneve a change happens to the directory.
+                -f | --filename: This option receives the name of the CSV file whose content you want to transfer to the Database.
+
+                -h | --host: This option receives the host upon which the Database server is running.
+
+                -P | --port: This option takes the port number upon which the Database server is running.
+
+                -u | --username: This option accepts the username of the database server.
+
+                -p | --password: This option receives the user\'s password to the database server.
+
+                -D | --database: This option accepts the name of the database server.
+
+                -t | --table: This option takes the name of the database table into which the CSV content will be transferred.
+
+                /? | --help: This option displays this help page.
+
+
+
+
+
+            Author: Daniel Okwufulueze [https://github.com/DOkwufulueze]
+            Date: 02/05/2018
+
+EOF
+);
+}
+
+if [[ $# -gt 0 ]]; then
+  while [[ "$1" != "" ]]; do
+    case "$1" in
+      -d | --directory )
+        shift;
+        directory="$1";
+      ;;
+
+      -c | --command )
+        shift;
+        commandName="$1";
+      ;;
+
+      -f | --filename )
+        shift;
+        fileNameComposition="-f $1";
+      ;;
+
+      -u | --username )
+        shift;
+        userNameComposition="-u $1";
+      ;;
+
+      -p | --password )
+        shift;
+        passwordComposition="-p $1";
+      ;;
+
+      -h | --host )
+        shift;
+        hostComposition="-h $1";
+      ;;
+
+      -P | --port )
+        shift;
+        portComposition="-P $1";
+      ;;
+
+      -D | --database )
+        shift;
+        databaseComposition="-D $1";
+      ;;
+
+      -t | --table )
+        shift;
+        tableComposition="-t $1";
+      ;;
+
+      /? | --help )
+        displayHowToUse;
+        echo "${helpText}" | less;
+        exit;
+      ;;
+
+      * )
+        echo "Invalid entry in watch-csv-mysql invocation.";
+        exit;
+      ;;
+    esac
+
+    shift;
+  done
+fi
+
+commandEntry="./${commandName} ${hostComposition} ${portComposition} ${userNameComposition} ${passwordComposition} ${databaseComposition} ${tableComposition}";
+
+# echo "./watch-directory -d ${directory} -c ${commandEntry}";
+echo "       watching ${directory} for changes...";
+
+$(./watch-directory -d "${directory}" -c "${commandEntry}");

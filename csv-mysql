@@ -1,0 +1,119 @@
+#!/bin/bash
+
+helpText=;
+
+userName=;
+password=;
+host=;
+port=;
+database=;
+table=;
+fileName=;
+
+function importCSV () {
+  IFS=,
+  while read column1 column2
+    do
+      echo "INSERT INTO ${table} (id, vin, inspectionId, createdAt, updatedAt) VALUES (UUID(), '$column1', '$column2', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);"
+  done < "${fileName}" | mysql "-u${userName}" "-p${password}" "${database}";
+}
+
+function displayHowToUse() {
+  helpText=$(cat << EOF
+
+
+
+            csv-mysql
+            Version: 1.0.0
+            Usage:
+              csv-mysql [OPTIONS]
+
+            Options:
+              <-f | --filename filename>
+              <-h | --host host>
+              <-P | --port port>
+              <-u | --username username>
+              <-p | --password password>
+              <-D | --database database>
+              <-t | --table table>
+              </? | --help>
+
+            Synopsis:
+              Purpose: This script copies the contents of a CSV in to a MySQL database whose credentials are supplied.
+
+              Options:
+                -f | --filename: This option receives the name of the CSV file whose content you want to transfer to the Database.
+
+                -h | --host: This option receives the host upon which the Database server is running.
+
+                -P | --port: This option takes the port number upon which the Database server is running.
+
+                -u | --username: This option accepts the username of the database server.
+
+                -p | --password: This option receives the user\'s password to the database server.
+
+                -D | --database: This option accepts the name of the database server.
+
+                -t | --table: This option takes the name of the database table into which the CSV content will be transferred.
+
+                /? | --help: This option displays this help page.
+
+
+
+
+            Author: Daniel Okwufulueze [https://github.com/DOkwufulueze]
+            Date: 02/05/2018
+
+EOF
+);
+}
+
+if [[ $# -gt 0 ]]; then
+  while [[ "$1" != "" ]]; do
+    case "$1" in
+      -f | --filename )
+        shift;
+        fileName="$1";
+      ;;
+
+      -u | --username )
+        shift;
+        userName="$1";
+      ;;
+
+      -p | --password )
+        shift;
+        password="$1";
+      ;;
+
+      -h | --host )
+        shift;
+        host="$1";
+      ;;
+
+      -P | --port )
+        shift;
+        port="$1";
+      ;;
+
+      -D | --database )
+        shift;
+        database="$1";
+      ;;
+
+      -t | --table )
+        shift;
+        table="$1";
+      ;;
+
+      /? | --help )
+        displayHowToUse;
+        echo "${helpText}" | less;
+        exit;
+    esac
+
+    shift;
+  done
+fi
+
+importCSV;
