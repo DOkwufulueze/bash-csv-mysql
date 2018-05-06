@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set +e;
+
 helpText=;
 
 userName=;
@@ -14,8 +16,8 @@ function importCSV () {
   IFS=,
   while read column1 column2
     do
-      echo "INSERT INTO ${table} (id, vin, inspectionId, createdAt, updatedAt) VALUES (UUID(), '$column1', '$column2', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);"
-  done < "${fileName}" | mysql "-u${userName}" "-p${password}" "${database}";
+      [[ -n "$column1" && -n "$column2" ]] && echo "INSERT INTO ${table} (id, vin, inspectionId, createdAt, updatedAt) VALUES (UUID(), '$column1', '$column2', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);" | mysql "-u${userName}" "-p${password}" "${database}";
+  done < "${fileName}";
 }
 
 function displayHowToUse() {
@@ -116,4 +118,4 @@ if [[ $# -gt 0 ]]; then
   done
 fi
 
-importCSV;
+importCSV >> "./log" 2>&1;
