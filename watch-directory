@@ -92,6 +92,6 @@ getAbsolutePathOfSelf;
 
 firstDirectoryCharacter=$(echo "${directory}" | head -c 1);
 
-[[ -n "${firstDirectoryCharacter}" && "${firstDirectoryCharacter}" != "/" ]] && directory="${scriptAbsolutePath}/${directory}"
+[[ -n "${firstDirectoryCharacter}" && "${firstDirectoryCharacter}" != "/" ]] && directory="${scriptAbsolutePath}/${directory}";
 
 beginWatch;
